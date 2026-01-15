@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "canisters": {
+    "asset_storage_lib": {
+      "type": "rust",
+      "candid": "asset_storage_lib.did",
+      "package": "asset-storage-lib"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
+    }
+  }
+}

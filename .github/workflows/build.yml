@@ -1,0 +1,65 @@
+# Copyright 2026 Declan Nnadozie
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build and Release
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+
+      - name: Install DFX
+        run: |
+          DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+          echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
+
+      - name: Verify DFX installation
+        run: dfx --version
+
+      - name: Build canister
+        run: dfx build asset_storage_lib
+
+      - name: Prepare release artifacts
+        run: |
+          mkdir -p release
+          cp .dfx/local/canisters/asset_storage_lib/asset_storage_lib.wasm release/
+          cp asset_storage_lib.did release/
+          cd release
+          sha256sum asset_storage_lib.wasm > asset_storage_lib.wasm.sha256
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release/asset_storage_lib.wasm
+            release/asset_storage_lib.did
+            release/asset_storage_lib.wasm.sha256
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
