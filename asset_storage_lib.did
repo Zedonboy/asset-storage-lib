@@ -1,0 +1,47 @@
+type AssetMetadata = record {
+  is_complete : bool;
+  chunks_count : nat32;
+  owner : principal;
+  uuid : text;
+  content_type : text;
+  created_at : nat64;
+  total_size : nat64;
+};
+type HttpRequest = record {
+  url : text;
+  method : text;
+  body : blob;
+  headers : vec record { text; text };
+  certificate_version : opt nat16;
+};
+type HttpResponse = record {
+  body : blob;
+  headers : vec record { text; text };
+  upgrade : opt bool;
+  status_code : nat16;
+};
+type InitAssetUploadArgs = record {
+  chunks_count : nat32;
+  content_type : text;
+  total_size : nat64;
+};
+type InitAssetUploadResult = record { url : text; uuid : text };
+type PrincipalUsage = record { total_bytes : nat64; asset_count : nat32 };
+type Result = variant { Ok; Err : text };
+type Result_1 = variant { Ok : InitAssetUploadResult; Err : text };
+type UploadChunkArgs = record {
+  chunk_index : nat32;
+  data : blob;
+  path : text;
+  is_last_chunk : bool;
+};
+service : () -> {
+  authorize : (principal) -> (Result);
+  deauthorize : (principal) -> (Result);
+  get_asset_metadata : (text) -> (opt AssetMetadata) query;
+  get_principal_usage : (opt principal) -> (opt PrincipalUsage) query;
+  http_request : (HttpRequest) -> (HttpResponse) query;
+  init_asset_upload : (InitAssetUploadArgs) -> (Result_1);
+  is_principal_authorized : (principal) -> (bool) query;
+  upload_chunk : (UploadChunkArgs) -> (Result);
+}
