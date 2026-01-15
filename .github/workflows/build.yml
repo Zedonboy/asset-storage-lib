@@ -32,21 +32,13 @@ jobs:
           toolchain: stable
           target: wasm32-unknown-unknown
 
-      - name: Install DFX
-        run: |
-          DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
-          echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
-
-      - name: Verify DFX installation
-        run: dfx --version
-
-      - name: Build canister
-        run: dfx build asset_storage_lib
+      - name: Build WASM
+        run: cargo build --target wasm32-unknown-unknown --release
 
       - name: Prepare release artifacts
         run: |
           mkdir -p release
-          cp .dfx/local/canisters/asset_storage_lib/asset_storage_lib.wasm release/
+          cp target/wasm32-unknown-unknown/release/asset_storage_lib.wasm release/
           cp asset_storage_lib.did release/
           cd release
           sha256sum asset_storage_lib.wasm > asset_storage_lib.wasm.sha256
