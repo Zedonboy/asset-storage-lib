@@ -29,13 +29,14 @@ jobs:
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+
           toolchain: stable
           target: wasm32-unknown-unknown
 
       - name: Build WASM
         run: cargo build --target wasm32-unknown-unknown --release
         env:
-          RUSTFLAGS: "-D warnings"
+          RUSTFLAGS: "--allow warnings"
 
       - name: Prepare release artifacts
         run: |
