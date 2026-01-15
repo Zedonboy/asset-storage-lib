@@ -192,6 +192,17 @@ fn is_controller() -> bool {
 }
 
 fn is_authorized() -> bool {
+    // check if anonymous principal is authorized
+
+    let is_anonymous_authorized = AUTHORIZED_PRINCIPALS.with(|principals| {
+        principals.borrow().contains_key(&Principal::anonymous())
+    });
+
+    // if anonymous can access the asset, then its for the public
+    if is_anonymous_authorized {
+        return true;
+    }
+
     let caller_principal = msg_caller();
     
     // Controller is always authorized
