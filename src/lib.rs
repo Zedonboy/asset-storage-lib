@@ -15,29 +15,25 @@
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk::api::{certified_data_set, data_certificate, msg_caller, time};
 use ic_cdk::management_canister::raw_rand;
-use ic_cdk::{export_candid, init, post_upgrade, pre_upgrade, query, update};
+use ic_cdk::{export_candid, init, post_upgrade, query, update};
 use ic_http_certification::{
     utils::add_v2_certificate_header, DefaultCelBuilder, DefaultResponseCertification,
-    DefaultResponseOnlyCelExpression, HeaderField, HttpCertification, HttpCertificationPath,
+    DefaultResponseOnlyCelExpression, HttpCertification, HttpCertificationPath,
     HttpCertificationTree, HttpCertificationTreeEntry, HttpRequest, HttpResponse, StatusCode,
     CERTIFICATE_EXPRESSION_HEADER_NAME,
 };
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::{
-    DefaultMemoryImpl, RestrictedMemory, StableBTreeMap, StableCell,
+    DefaultMemoryImpl, StableBTreeMap, StableCell,
     Storable,
 };
 use lazy_static::lazy_static;
-use serde::{Deserialize as SerdeDeserialize, Serialize as SerdeSerialize};
-use sha2::{Digest, Sha256};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
-
-const MAX_INGRESS_SIZE: usize = 2_000_000; // ~2MB
 
 lazy_static! {
     static ref CEL_EXPR: DefaultResponseOnlyCelExpression<'static> = DefaultCelBuilder::response_only_certification()
@@ -286,7 +282,7 @@ fn create_certified_error_response(
         CEL_EXPR.to_string(),
     );
 
-    let mut response = HttpResponse::builder()
+    let response = HttpResponse::builder()
         .with_status_code(status_code)
         .with_headers(headers.clone())
         .with_body(body.to_vec())
