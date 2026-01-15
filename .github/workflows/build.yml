@@ -46,10 +46,18 @@ jobs:
           cd release
           sha256sum asset_storage_lib.wasm > asset_storage_lib.wasm.sha256
 
+      - name: Generate tag
+        id: generate_tag
+        run: |
+          TAG="build-$(date +'%Y%m%d-%H%M%S')-${GITHUB_SHA::7}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Generated tag: $TAG"
+
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.generate_tag.outputs.tag }}
+          name: Release ${{ steps.generate_tag.outputs.tag }}
           files: |
             release/asset_storage_lib.wasm
             release/asset_storage_lib.did
